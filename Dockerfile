@@ -1,8 +1,15 @@
-FROM python:3.9.2-slim-buster
+FROM python:3.9-slim-bullseye
+
 RUN mkdir /app && chmod 777 /app
 WORKDIR /app
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt -qq update && apt -qq install -y git python3 python3-pip ffmpeg
-COPY . .
+
+# update + install only required packages, clean apt lists to keep image small
+RUN apt-get -qq update \
+ && apt-get -qq install -y --no-install-recommends git ffmpeg \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY . /app
 RUN pip3 install --no-cache-dir -r requirements.txt
-CMD python3 main.py
+
+CMD ["python3", "main.py"]
